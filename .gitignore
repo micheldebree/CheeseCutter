@@ -1,0 +1,16 @@
+# Compiled D files
+*.o
+
+# Compiled C64 SID player
+player.bin
+
+# Compiled applications
+/ccutter
+/ct2util
+
+# OSX build artifacts
+/Cheesecutter.app
+/Cheesecutter*.dmg
+
+# Distribution artifacts
+/dist
