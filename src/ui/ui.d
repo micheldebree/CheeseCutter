@@ -236,7 +236,7 @@ class Infobar : Window {
 		int c1 = audio.player.isPlaying ? 13 : 12;
 		screen.fprint(x1,area.y,format("`05Time: `0%x%02d:%02d / $%02x",
 									   c1,audio.timer.min, audio.timer.sec,
-									   audio.callback.linesPerFrame));
+									   audio.callback.linesPerFrame & 255));
 		
 		screen.fprint(x1 + 19,area.y,
 				   format("`05Oct: `0d%d  `05Spd: `0d%X  `05St: `0d%d ",
@@ -673,7 +673,6 @@ final private class Toplevel : WindowSwitcher {
 
 	void startFp() {
 		followplay = true;
-//		sequencer.deactivate();
 		windows[0] = fplay;
 		if(activeWindow == sequencer)
 			activateWindow(0);
@@ -693,7 +692,6 @@ final private class Toplevel : WindowSwitcher {
 		followplay = false;
 		windows[0] = sequencer;
 		activateWindow(activeWindowNum);
-		sequencer.activeView.refresh();
 	}
 
 	void stopPlayback() {
@@ -1140,7 +1138,6 @@ final class UI {
 				d.setDirectory(getcwd());
 			}
 			loaddialog.fsel.fpos.reset();
-			writeln("reset loaddialog");
 		}
 	}
 
@@ -1154,7 +1151,6 @@ final class UI {
 
 	private void loadCallback(string s, bool doImport) {
 		stop();
-		toplevel.reset();
 		
 		if(std.file.exists(s) == 0 || std.file.isDir(s)) {
 			statusline.display("File not found or not accessible: " ~ s);
@@ -1199,6 +1195,8 @@ final class UI {
 		
 		enableKeyjamMode(false);
 
+		toplevel.reset();
+		
 		if(doImport) {
 			statusline.display("Song data imported.");
 		}
