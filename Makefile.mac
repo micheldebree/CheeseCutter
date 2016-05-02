@@ -1,7 +1,7 @@
 #LIBS=/opt/ldc/build/lib/libphobos-ldc.a /opt/ldc/build/lib/libdruntime-ldc.a -lstdc++
 #LIBS=/opt/ldc2/lib/libphobos-ldc.a /opt/ldc2/lib/libdruntime-ldc.a -lstdc++
 LIBS=/usr/local/lib/libphobos2-ldc.a /usr/local/lib/libdruntime-ldc.a -lstdc++
-FRAMEWORKS=-framework Foundation -framework SDL
+FRAMEWORKS=-F/Library/Frameworks -framework Foundation -framework SDL
 COMFLAGS= -mmacosx-version-min=10.7
 VERSION=$(shell cat Version)
 DLINK=$(COMFLAGS)
@@ -51,7 +51,7 @@ dist:	release
 	rm -rf CheeseCutter_$(VERSION).dmg
 	arch/makedmg.sh
 
-clean: 
+clean:
 	rm -f *.o *~ resid/*.o resid-fp/*.o ccutter ct2util \
 		$(C64OBJS) $(OBJS) $(CTOBJS) $(CXX_OBJS) $(UTILOBJS)
 
@@ -73,6 +73,3 @@ src/ui/ui.o: src/ui/help.o
 
 %.o: %.d
 	$(COMPILE.d) $<
-
-
-
