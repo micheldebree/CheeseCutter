@@ -12,7 +12,7 @@ struct ContextHelp {
 	string[] text;
 }
 
-ContextHelp HELPMAIN = ContextHelp("Main help", 
+ContextHelp HELPMAIN = ContextHelp("Main help",
 ["
 Escape (x2).....Quit program
 F10.............Open the Load song dialog
@@ -35,7 +35,7 @@ Ctrl-F9.........Show/hide playback info (works only when playing)
 `+dSong variables\n
 Ctrl-Keypad - +.........Decrease/increase default song speed
 [ ] (AltGr-8 / AltGr-9).Decrease/increase default song speed
-Alt-Keypad - +..........Decrease/increase multispeed framecall counter 
+Alt-Keypad - +..........Decrease/increase multispeed framecall counter
 { } (AltGr-7 / AltGr-0).Decrease/increase multispeed framecall counter
 Ctrl-F3.................Toggle SID type (6581/8580)
 Ctrl-F8.................Select next SID filter preset
@@ -59,7 +59,7 @@ Alt-4-8 can also move between tables (in the aforementioned order,
 so Alt-4 = Sequencer, Alt-5 = Ins, ...)
 
 `+dInstrument table functions\n
-Ctrl-L..................Load current insturment from disk
+Ctrl-L..................Load current instrument from disk
 Ctrl-S..................Save current instrument to disk
 Ctrl-D..................Delete current instrument
 Ctrl-C..................Copy instrument to clipboard
@@ -88,9 +88,9 @@ Keypad - +..............Decrease/increase active instrument number
 Keypad 1-9..............Set cursor step value (used when entering notes)
 Alt-Left/Right..........Activate previous/next subtune
 
-F5......................Enter to the track column
+F5......................Enter the track column
 Shift-F5................Display tracks alongside the sequences
-F6......................Enter to the note column
+F6......................Enter the note column
 F7......................Display tracks only ('overview mode')
 
 Home/End................Move cursor to SEQ start/end OR screen top/bottom
@@ -162,4 +162,3 @@ ContextHelp genPlayerContextHelp(string title, char*[] descriptions) {
 	ContextHelp ctx = ContextHelp(title, [text]);
 	return ctx;
 }
-
