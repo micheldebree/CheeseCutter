@@ -104,7 +104,7 @@ class VideoStandard : Video {
 		height = requestedHeight;
 		useFullscreen = fs;
 		int sdlflags = SDL_SWSURFACE;
-		sdlflags |= fs ? SDL_FULLSCREEN : 0;
+		sdlflags |= fs ? SDL_FULLSCREEN : SDL_RESIZABLE;
 		surface = SDL_SetVideoMode(width, height, 0, sdlflags); 
 		if(surface is null) {
 			throw new DisplayError("Unable to initialize graphics mode.");
