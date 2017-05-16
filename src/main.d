@@ -40,8 +40,8 @@ void initVideo(bool useFullscreen, bool useyuv) {
 	int width = mx / FONT_X;
 	int height = my / FONT_Y;
 	screen = new Screen(width, height);
-	video = useyuv ? new VideoYUV(800, 600, screen, useFullscreen ? 1 : 0) :
-		new VideoStandard(800, 600, screen, useFullscreen ? 1 : 0);
+	video = useyuv ? new VideoYUV(mx, my, screen, useFullscreen ? 1 : 0) :
+		new VideoStandard(mx, my, screen, useFullscreen ? 1 : 0);
 
 	SDL_EnableKeyRepeat(200, 10);
 	SDL_EnableUNICODE(1);
@@ -283,4 +283,3 @@ void loadFile(string filename){
 		mainui.update();
 	}
 }
-
