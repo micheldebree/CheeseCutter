@@ -230,7 +230,7 @@ class Infobar : Window {
 	  
 		screen.clrtoeol(0, headerColor);
 
-		enum hdr = "CheeseCutter-OSX 2.8.3-SNAPSHOT" ~ com.util.versionInfo;
+		enum hdr = "CheeseCutter 2.9" ~ com.util.versionInfo;
 		screen.cprint(4, 0, 1, headerColor, hdr);
 		screen.cprint(screen.width - 14, 0, 1, headerColor, "F12 = Help");
 		int c1 = audio.player.isPlaying ? 13 : 12;
@@ -487,18 +487,31 @@ final private class Toplevel : WindowSwitcher {
 			case SDLK_i:
 				activateWindow(1);
 				break;
-			case SDLK_5:
-			case SDLK_w:
-			case SDLK_6:
-			case SDLK_p:
-			case SDLK_7:
-			case SDLK_f:
-			case SDLK_8:
-			case SDLK_m:
-			case SDLK_9:
-			case SDLK_d:
+			case SDLK_5, SDLK_w:
 				activateWindow(2);
-				break;
+				key.key = SDLK_w;
+				activeWindow.keypress(key);
+				return OK;
+			case SDLK_6, SDLK_p:
+				activateWindow(2);
+				key.key = SDLK_p;
+				activeWindow.keypress(key);
+				return OK;
+			case SDLK_7, SDLK_f:
+				activateWindow(2);
+				key.key = SDLK_f;
+				activeWindow.keypress(key);
+				return OK;
+			case SDLK_8, SDLK_m:
+				activateWindow(2);
+				key.key = SDLK_m;
+				activeWindow.keypress(key);
+				return OK;
+			case SDLK_9, SDLK_d:
+				activateWindow(2);
+				key.key = SDLK_d;
+				activeWindow.keypress(key);
+				return OK;
 			case SDLK_t:
 				ui.activateDialog(UI.infobar);
 				return OK;
@@ -550,6 +563,13 @@ final private class Toplevel : WindowSwitcher {
 				if(activeWindowNum >= windows.length)
 					activeWindowNum %= windows.length;
 				activateWindow();
+				return OK;
+			case SDLK_z:
+				com.session.executeUndo();
+				return OK;
+			case SDLK_r:
+				com.session.executeRedo();
+				refresh();
 				return OK;
 			default:
 				break;
@@ -877,7 +897,7 @@ final class UI {
 			}
 			else if(toplevel.fplayEnabled()) { // drop tracking
 				stop(false);
-				seqPos.dup(fplayPos);
+				seqPos.copyFrom(fplayPos);
 				toplevel.stopFp();
 				return;
 			}
@@ -1043,7 +1063,7 @@ final class UI {
 				 if(!audio.player.isPlaying) break;
 				 if(toplevel.fplayEnabled()) {
 					 stop(false);
-					 seqPos.dup(fplayPos);
+					 seqPos.copyFrom(fplayPos);
 					 toplevel.stopFp();
 					 statusline.display("Tracking off.");
 				 }
@@ -1055,7 +1075,7 @@ final class UI {
 				 break;
 			 case SDLK_F4:
 				 if(toplevel.fplayEnabled()) 
-					 seqPos.dup(fplayPos);
+					 seqPos.copyFrom(fplayPos);
 				 stop();
 				 if(toplevel.fplayEnabled())
 					 toplevel.stopFp();
@@ -1166,8 +1186,7 @@ final class UI {
 			}
 		}
 		catch(Exception e) {
-			stderr.writeln(e.toString);	
-			statusline.display("Could not load file!");
+			statusline.display("Error: " ~ e.toString);
 			return;
 		}
 		
@@ -1200,6 +1219,10 @@ final class UI {
 		if(doImport) {
 			statusline.display("Song data imported.");
 		}
+
+		import com.session;
+		com.session.state.undoQueue.clear();
+		com.session.state.redoQueue.clear();
 	}
 
 	void activateDialog(Window d) {

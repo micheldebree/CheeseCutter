@@ -26,10 +26,9 @@ private
     else
     {
         import std.c.linux.linux;
-        import std.c.stdlib;
-        import std.c.string;
-        import std.file;
-
+        import core.stdc.stdlib;
+        import core.stdc.string;
+        import core.sys.posix.unistd;
         static import std.string;
     }
 

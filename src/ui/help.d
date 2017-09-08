@@ -98,6 +98,8 @@ Shift-Home/End..........Move cursor to song start/end
 Backspace...............Set playback start mark (the blue bar) to current position
 Ctrl-Home/Ctrl-H........Jump to playback mark position (also realigns the voices)
 
+Ctrl-Z..................Undo
+Ctrl-R..................Redo
 Alt-C...................Ask for a SEQ number and copy contents over current SEQ
 Alt-A...................Ask for a SEQ number and insert contents to cursor pos
 (Shift-)Insert/Delete...Insert/delete a row (Shift=w/ sequence expand/shrink)
@@ -107,7 +109,7 @@ Ctrl-Q/A................Transpose semitone up/down
 ","Ctrl-W/S................Transpose octave up/down
 Ctrl-M/N................Increase/decrease row highlight value
 Ctrl-0(zero)............Reset highlighting to current row
-Ctrl-R..................Show/hide row counters for sequences
+Ctrl-E..................Show/hide row counters for sequences
 Ctrl-T..................Toggle notes relative to current transpose
 Keypad 0................Play notes for all voices in current row
 Ctrl-P..................Split current sequence into two from cursor pos.
@@ -141,7 +143,7 @@ Ctrl-Q/A................Transpose all tracks up/down from cursor down
 Ctrl-C..................Ask for a number and copy the N of tracks into clipboard
 Ctrl-V..................Paste copied tracks from the clipboard
 Space...................Write the cached sequence number to the track value
-Shift-Insert/Delete.....Insert empty track (A000) or delete track from cursor
+Insert/Delete...........Insert empty track (A000) or delete track from cursor
                         pos down
 Ctrl-Enter..............Insert a track to end of voice and move cursor there
 Ctrl-Insert/Delete......Insert/delete track to end of voice and move cursor there

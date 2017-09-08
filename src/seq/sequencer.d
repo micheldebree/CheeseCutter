@@ -11,12 +11,12 @@ import com.session;
 import com.util;
 import ui.input;
 import ui.dialogs;
-private {
+
 	import seq.fplay;
 	import seq.tracktable;
 	import seq.seqtable;
 	import seq.trackmap;
-}
+
 import derelict.sdl.sdl;
 import std.string;
 import std.stdio;
@@ -33,6 +33,7 @@ int activeVoiceNum;
 private int stepCounter;
 int tableTop = 15, tableBot = -16;
 enum anchor = 16;
+Clip[] clip;
 
 private {
 	bool useRelativeNotes = true;
@@ -56,13 +57,10 @@ struct VoiceInitParams {
 	Tracklist t;
 	Rectangle a;
 	PosData p;
+	VoiceTable voiceTable;
 }
 
-private struct Clip {
-	int trans, no;
-}
-
-protected class PosData {
+class PosData {
 	int pointerOffsetValue = anchor;
 	int trkOffset = 0;
 	int seqOffset;
@@ -93,7 +91,7 @@ protected class PosData {
 	
 }
 
-protected class PosDataTable {
+class PosDataTable {
 	PosData[] pos;
 
 	PosData opIndex(int idx) {
@@ -128,7 +126,13 @@ protected class PosDataTable {
 		return 0;
 	}
 
-	void dup(PosDataTable pt) {
+	PosDataTable dup() {
+		auto pt = new PosDataTable();
+		pt.copyFrom(this);
+		return pt;
+	}
+	
+	void copyFrom(PosDataTable pt) {
 		for(int i = 0 ; i < 3; i++) {
 			PosData p = pos[i];
 			PosData t = pt[i];
@@ -137,7 +141,6 @@ protected class PosDataTable {
 			p.trkOffset = t.trkOffset;
 			p.rowCounter = t.rowCounter;
 			p.mark = t.mark;
-			//writeln(p.seqOffset);
 		}
 	}
 }
@@ -145,17 +148,18 @@ protected class PosDataTable {
 // ------------------------------------------------------------------------
 // ------------------------------------------------------------------------
 
-abstract protected class Voice : Window {
+abstract class Voice : Window {
 	Tracklist tracks;
 	PosData pos;
 	RowData activeRow;
 	Input input;
 	alias input activeInput;
+	VoiceTable parent;
 	
 	this(ref VoiceInitParams v) {
 		super(v.a);
 		tracks = v.t; pos = v.p;
-		assert(pos !is null);
+		parent = v.voiceTable;
 	}
 
 public:
@@ -340,7 +344,7 @@ protected:
 	}
 }
 
-protected abstract class VoiceTable : Window {
+abstract class VoiceTable : Window {
 	Voice[3] voices;
 	Voice active;
 	alias active activeVoice;
@@ -412,7 +416,7 @@ protected abstract class VoiceTable : Window {
 			case SDLK_0:
 				song.highlightOffset = posTable.rowCounter+posTable.pointerOffset;
 				break;
-			case SDLK_r:
+			case SDLK_e:
 				displaySequenceRowcounter ^= 1;
 				break;
 			case SDLK_t:
@@ -738,7 +742,7 @@ protected abstract class VoiceTable : Window {
 
 // -------------------------------------------------------------------
 
-final class Sequencer : Window {
+final class Sequencer : Window, Undoable {
 	private {
 		VoiceTable[] voiceTables;
 		TrackmapTable trackmapTable;
@@ -779,7 +783,6 @@ final class Sequencer : Window {
 		
 	}
 
-public:
 	void activateVoice(int n) {
 		activeView.jumpToVoice(n);
 		input = activeView.input;
@@ -790,7 +793,6 @@ public:
 	void reset(bool tostart) {
 		activeView.deactivate();
 		if(tostart) {
-			writeln("HARD RESET");
 			foreach(b; voiceTables) {
 				b.toSeqStart();
 			}
@@ -815,8 +817,8 @@ public:
 	}
 
 	override int keypress(Keyinfo key) {
-		if(key.raw >= SDLK_KP1 && key.raw <= SDLK_KP9) {
-			stepValue = key.raw - SDLK_KP1 + 1;
+		if(key.raw >= SDLK_KP0 && key.raw <= SDLK_KP9) {
+			stepValue = key.raw - SDLK_KP0;
 			return OK;
 		}
 		if(key.mods & KMOD_ALT) {
@@ -905,6 +907,8 @@ public:
 
 	override int keyrelease(Keyinfo key) {
 		stepCounter = 0;
+		// lazily skipping the "view" layer (so no keyrelease event ever gets there at the moment)
+		activeView.activeVoice.keyrelease(key);
 		return OK;
 	}
 
@@ -918,8 +922,9 @@ public:
 	}
 
 protected:
+
 	void changeSubtune(int direction) {
-		postables[song.subtune].dup(activeView.posTable);
+		postables[song.subtune].copyFrom(activeView.posTable);
 		
 		refresh();
 		mainui.stop();
@@ -930,9 +935,10 @@ protected:
 			song.incSubtune() :
 			song.decSubtune();
 
-		activeView.posTable.dup(postables[song.subtune]);
+		activeView.posTable.copyFrom(postables[song.subtune]);
 		activeView.activate();
 		refresh();
+		activeView.step(0);
 	}
 	
 	override void update() {
@@ -952,9 +958,42 @@ protected:
 	  }
 	}
 
+	override final void undo(UndoValue entry) {
+		if(entry.subtuneNum != song.subtune)
+			return;
+
+		with(entry) {
+			auto data = array.target;
+			auto target = array.source;
+			target[] = data;
+			seq.refresh();
+			activeView.posTable.copyFrom(entry.posTable);
+		}
+		refresh();
+		activeView.step(0);
+	}
+
+	override final UndoValue createRedoState(UndoValue value) {
+		value.array.target = value.array.source.dup;
+		return value;
+	}
+
 private:
-	
+
+	void saveState() {
+		UndoValue v;
+		import std.typecons;
+		RowData s = activeView.getRowData();
+		v.array = UndoValue.Array(s.seq.data.raw.dup,
+								  s.seq.data.raw);
+		v.seq = s.seq;
+		v.posTable = activeView.posTable.dup();
+		v.subtuneNum = song.subtune;
+		com.session.insertUndo(this, v);
+	}
+
 	void insertCallback(int param) {
+		saveState();
 		if(param >= MAX_SEQ_NUM) return;
 		RowData s = activeView.getRowData();
 		Sequence fr = song.seqs[param];
@@ -964,6 +1003,7 @@ private:
 	}
 
 	void copyCallback(int param) {
+		saveState();
 		if(param >= MAX_SEQ_NUM) return;
 		RowData s = activeView.getRowData();
 		Sequence fr = song.seqs[param];

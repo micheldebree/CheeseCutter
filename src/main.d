@@ -123,7 +123,6 @@ void mainloop() {
 				mainui.update();
 				break;
 			default:
-				//writeln("Unknown SDL event ",evt.type);
 				break;
 			}
 		}
@@ -138,7 +137,7 @@ void mainloop() {
 }
 
 void printheader() {
-	stderr.writefln("CheeseCutter (C) 2009-15 Abaddon");
+	stderr.writefln("CheeseCutter (C) 2009-17 Abaddon");
 	stderr.writefln("Released under GNU GPL.");
 	stderr.writef("\n");
 	stderr.writefln("Usage: ccutter [OPTION]... [FILE]");
@@ -164,20 +163,25 @@ int main(char[][] args) {
 	bool fnDefined = false;
 
 	DerelictSDL.load();
-	
+
+	import std.process;
+	auto ct_home = environment.get("CC_HOME");
+	if(ct_home !is null)
+		chdir(ct_home);
+
 	scope(exit) {
 		delete mainui;
 		delete video;
 		SDL_Quit();
 	}
-	
+
 	scope(failure) {
 		if(song !is null) {
 			stderr.writefln("Crashed! Saving backup...");
 			song.save("_backup.ct");
 		}
 	}
-
+	
 	try {
 		i = 1;
 		while(i < args.length) {
@@ -250,7 +254,7 @@ int main(char[][] args) {
 		std.stdio.stderr.writeln(e);
 		return -1;
 	}
-	
+
 	audio.player.init();
 	initVideo(fs, yuvOverlay);
 	initSession();
