@@ -408,10 +408,10 @@ class FileSelector : Window {
 		}
 
 		dirs.length = idxd;
- 		dirs.sort;
+     //dirs.sort;
 		
 		files.length = idxf;
-		files.sort;
+		//files.sort;
 
 		string[] all = cast(string[])(dirs ~ files);
 		
